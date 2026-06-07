@@ -13,6 +13,8 @@
 namespace {
 constexpr uint8_t kRelayCount = 6;
 constexpr int8_t kRelayPins[kRelayCount] = {2, 26, 27, -1, -1, -1};
+constexpr uint32_t kWiFiTimeoutMs = 15000;
+constexpr size_t kStatesJsonReserveSize = 220;
 
 WebServer server(80);
 bool relayStates[kRelayCount] = {false, false, false, false, false, false};
@@ -68,7 +70,7 @@ void handleSetRelay(const bool on) {
 
 String statesJson() {
   String json = "{\"relays\":[";
-  json.reserve(220);
+  json.reserve(kStatesJsonReserveSize);
   for (uint8_t i = 0; i < kRelayCount; ++i) {
     if (i > 0) {
       json += ",";
@@ -104,7 +106,6 @@ void connectWifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  constexpr uint32_t kWiFiTimeoutMs = 15000;
   const uint32_t startMs = millis();
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED && (millis() - startMs) < kWiFiTimeoutMs) {
