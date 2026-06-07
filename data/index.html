@@ -9,6 +9,7 @@
     .relay { margin-bottom: 1rem; }
     button { margin-right: 0.5rem; padding: 0.5rem 1rem; }
     .status { font-weight: bold; }
+    #error { color: #b00020; }
   </style>
 </head>
 <body>
@@ -34,7 +35,7 @@
     <button onclick="setRelay(3, false)">OFF</button>
     <span class="status" id="s3">unknown</span>
   </div>
-  <p id="error" style="color: #b00020;"></p>
+  <p id="error"></p>
 
   <script>
     async function setRelay(id, on) {

@@ -17,6 +17,7 @@ constexpr int8_t kRelayPins[kRelayCount] = {2, 26, 27, -1, -1, -1};
 WebServer server(80);
 bool relayStates[kRelayCount] = {false, false, false, false, false, false};
 bool serverStarted = false;
+bool littleFsReady = false;
 
 bool isRelayConfigured(const uint8_t relayId) {
   return relayId < kRelayCount && kRelayPins[relayId] >= 0;
@@ -84,6 +85,11 @@ void handleState() {
 }
 
 void serveIndex() {
+  if (!littleFsReady) {
+    server.send(503, "text/plain", "LittleFS unavailable");
+    return;
+  }
+
   File file = LittleFS.open("/index.html", "r");
   if (!file) {
     server.send(500, "text/plain", "Missing /index.html in LittleFS");
@@ -98,10 +104,10 @@ void connectWifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  constexpr uint32_t kWifiTimeoutMs = 15000;
+  constexpr uint32_t kWiFiTimeoutMs = 15000;
   const uint32_t startMs = millis();
   Serial.print("Connecting to Wi-Fi");
-  while (WiFi.status() != WL_CONNECTED && (millis() - startMs) < kWifiTimeoutMs) {
+  while (WiFi.status() != WL_CONNECTED && (millis() - startMs) < kWiFiTimeoutMs) {
     delay(250);
     Serial.print('.');
   }
@@ -129,11 +135,9 @@ void setupRelays() {
 void setup() {
   Serial.begin(115200);
 
-  if (!LittleFS.begin(true)) {
+  littleFsReady = LittleFS.begin(true);
+  if (!littleFsReady) {
     Serial.println("LittleFS init failed");
-    while (true) {
-      delay(1000);
-    }
   }
 
   setupRelays();
