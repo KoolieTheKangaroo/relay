@@ -34,22 +34,39 @@
     <button onclick="setRelay(3, false)">OFF</button>
     <span class="status" id="s3">unknown</span>
   </div>
+  <p id="error" style="color: #b00020;"></p>
 
   <script>
     async function setRelay(id, on) {
       const endpoint = on ? '/api/relay/on' : '/api/relay/off';
-      await fetch(`${endpoint}?id=${id}`, { method: 'POST' });
-      await loadState();
+      try {
+        const response = await fetch(`${endpoint}?id=${id}`, { method: 'POST' });
+        if (!response.ok) {
+          throw new Error(`Request failed (${response.status})`);
+        }
+        document.getElementById('error').textContent = '';
+        await loadState();
+      } catch (error) {
+        document.getElementById('error').textContent = `Relay action failed: ${error.message}`;
+      }
     }
 
     async function loadState() {
-      const response = await fetch('/api/relay/state');
-      const data = await response.json();
-      for (const relay of data.relays) {
-        if (relay.id <= 3) {
-          const el = document.getElementById(`s${relay.id}`);
-          el.textContent = relay.state ? 'ON' : 'OFF';
+      try {
+        const response = await fetch('/api/relay/state');
+        if (!response.ok) {
+          throw new Error(`State request failed (${response.status})`);
         }
+        const data = await response.json();
+        for (const relay of data.relays) {
+          if (relay.id <= 3) {
+            const el = document.getElementById(`s${relay.id}`);
+            el.textContent = relay.state ? 'ON' : 'OFF';
+          }
+        }
+        document.getElementById('error').textContent = '';
+      } catch (error) {
+        document.getElementById('error').textContent = `Failed to load relay state: ${error.message}`;
       }
     }
 

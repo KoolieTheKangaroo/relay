@@ -16,6 +16,7 @@ constexpr int8_t kRelayPins[kRelayCount] = {2, 26, 27, -1, -1, -1};
 
 WebServer server(80);
 bool relayStates[kRelayCount] = {false, false, false, false, false, false};
+bool serverStarted = false;
 
 bool isRelayConfigured(const uint8_t relayId) {
   return relayId < kRelayCount && kRelayPins[relayId] >= 0;
@@ -138,15 +139,21 @@ void setup() {
   setupRelays();
   connectWifi();
 
-  server.on("/", HTTP_GET, serveIndex);
-  server.on("/api/relay/on", HTTP_POST, []() { handleSetRelay(true); });
-  server.on("/api/relay/off", HTTP_POST, []() { handleSetRelay(false); });
-  server.on("/api/relay/state", HTTP_GET, handleState);
-  server.begin();
-
-  Serial.println("HTTP server started");
+  if (WiFi.status() == WL_CONNECTED) {
+    server.on("/", HTTP_GET, serveIndex);
+    server.on("/api/relay/on", HTTP_POST, []() { handleSetRelay(true); });
+    server.on("/api/relay/off", HTTP_POST, []() { handleSetRelay(false); });
+    server.on("/api/relay/state", HTTP_GET, handleState);
+    server.begin();
+    serverStarted = true;
+    Serial.println("HTTP server started");
+  } else {
+    Serial.println("HTTP server not started because Wi-Fi is unavailable");
+  }
 }
 
 void loop() {
-  server.handleClient();
+  if (serverStarted) {
+    server.handleClient();
+  }
 }
