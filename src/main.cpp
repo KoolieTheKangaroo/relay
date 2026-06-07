@@ -66,6 +66,7 @@ void handleSetRelay(const bool on) {
 
 String statesJson() {
   String json = "{\"relays\":[";
+  json.reserve(220);
   for (uint8_t i = 0; i < kRelayCount; ++i) {
     if (i > 0) {
       json += ",";
@@ -96,14 +97,20 @@ void connectWifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
+  constexpr uint32_t kWifiTimeoutMs = 15000;
+  const uint32_t startMs = millis();
   Serial.print("Connecting to Wi-Fi");
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED && (millis() - startMs) < kWifiTimeoutMs) {
     delay(250);
     Serial.print('.');
   }
   Serial.println();
-  Serial.print("Connected. IP: ");
-  Serial.println(WiFi.localIP());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("Connected. IP: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("Wi-Fi timeout, running without network connectivity");
+  }
 }
 
 void setupRelays() {
@@ -123,6 +130,9 @@ void setup() {
 
   if (!LittleFS.begin(true)) {
     Serial.println("LittleFS init failed");
+    while (true) {
+      delay(1000);
+    }
   }
 
   setupRelays();
