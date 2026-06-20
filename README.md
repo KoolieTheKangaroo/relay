@@ -12,10 +12,10 @@ ESP32 Wroom controlling a 6 Relay module.
 
 ## Initial relay mapping
 
-- Relay 1 -> GPIO 2
-- Relay 2 -> GPIO 26
-- Relay 3 -> GPIO 27
-- Relay 4-6 reserved for later (`-1` placeholder)
+- Relay 0 -> GPIO 2
+- Relay 1 -> GPIO 26
+- Relay 2 -> GPIO 27
+- Relay 3-5 reserved for later (`-1` placeholder)
 
 ## API
 
@@ -26,10 +26,17 @@ ESP32 Wroom controlling a 6 Relay module.
 ## Wi-Fi flashing
 
 - Build and upload LittleFS once with USB if needed, then use OTA uploads over Wi-Fi.
-- PlatformIO is configured for `espota` uploads to `relay.local`.
+- Default PlatformIO environment (`esp32dev`) is USB upload.
+- OTA upload is in the `esp32dev-ota` environment and targets `relay.local`.
 - If you define `OTA_PASSWORD` in `include/secrets.h`, also pass the same auth when uploading.
+
+### Upload commands
+
+- USB firmware upload: `pio run -e esp32dev -t upload`
+- USB LittleFS upload: `pio run -e esp32dev -t uploadfs`
+- OTA firmware upload: `pio run -e esp32dev-ota -t upload`
 
 ## Notes
 
-- UI on `/` provides 3 relay control buttons.
+- UI on `/` provides control buttons for relays `0..2`.
 - Update `APP_VERSION` in `platformio.ini` when bumping versions.

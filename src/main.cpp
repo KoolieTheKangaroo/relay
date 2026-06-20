@@ -127,7 +127,7 @@ namespace
     }
 
     writeRelay(relayId, on);
-    sendJson(200, "{\"ok\":true,\"relay\":" + String(relayId + 1) + ",\"state\":\"" + (on ? "on" : "off") + "\"}");
+    sendJson(200, "{\"ok\":true,\"relay\":" + String(relayId) + ",\"state\":\"" + (on ? "on" : "off") + "\"}");
   }
 
   String statesJson()
@@ -140,7 +140,7 @@ namespace
       {
         json += ",";
       }
-      json += "{\"id\":" + String(i + 1) + ",\"configured\":" + String(isRelayConfigured(i) ? "true" : "false") +
+      json += "{\"id\":" + String(i) + ",\"configured\":" + String(isRelayConfigured(i) ? "true" : "false") +
               ",\"state\":" + String(relayStates[i] ? "true" : "false") + "}";
     }
     json += "]}";
